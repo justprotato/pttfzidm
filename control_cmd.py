@@ -60,6 +60,7 @@ class PTZ():
         # init states for sockect logic
         #private
         self.zooming = False
+        self.driving = False
 
     def __del__(self):
         del self.visca
@@ -68,7 +69,9 @@ class PTZ():
         self.visca.send(Pan_TiltDrive_Home)
 
     def pt_stop(self, p_speed, t_speed):
-        self.visca.send(Pan_TiltDrive_Stop.format(24, 20))
+        if self.driving:
+            self.driving = False
+            self.visca.send(Pan_TiltDrive_Stop.format(24, 20))
 
     def up(self, p_speed, t_speed):
         self.visca.send(Pan_TiltDrive_Up.format(p_speed, t_speed))
@@ -104,6 +107,7 @@ class PTZ():
 
     def zoomstop(self):
         if self.zooming:
+            self.zooming = False
             self.visca.send(CAM_Zoom_Stop)
 
     def ptdrive_relative_pos(self, p_speed, t_speed, x, y):

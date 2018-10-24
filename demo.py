@@ -25,7 +25,11 @@ Preset Position control：
 
 import os
 import pprint
-import pygame
+
+import contextlib
+with contextlib.redirect_stdout(None):
+    import pygame
+
 import math
 import control_cmd
 
@@ -100,10 +104,11 @@ class PS4Controller(object):
                         ww += 10
 
                 # p = 0(low) - 7(high)
-                tele_speed = round(self.axis_data[4] / 10 * 7)
-                wide_speed = round(self.axis_data[5] / 10 * 7)
+                wide_speed = round((self.axis_data[5]+10)/20 * 7)
+                tele_speed = round((self.axis_data[4]+10)/20 * 7)
+                
                 # cmd display
-                print('{}   {}'.format(vv, ww), end='\r', flush=True)
+                print('	pan:{:02}, tilt:{:02}	wide:{}, tele:{}'.format(vv, ww, wide_speed, tele_speed), end='\r', flush=True)
                 # drive
                 if (leftjoystick_pan != 0 and leftjoystick_tilt != 0):
                     if leftjoystick_pan < 0 and leftjoystick_tilt < 0:
