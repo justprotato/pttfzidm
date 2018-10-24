@@ -6,7 +6,8 @@ import socket
 # default camera address
 cam_addr = 1
 """
-Error Messages
+Error Messages Command
+    y = x+8, where x is the camera address
 """
 Syntax_Error = "90 60 02 FF"
 Command_Buffer_Full = "90 60 03 FF"
@@ -14,7 +15,24 @@ Command_Canceled = "90 6{} 04 FF".format(cam_addr+8)
 No_Socket = "90 6{} 05 FF".format(cam_addr+8)
 Command_Not_Executable = "90 6{} 41 FF".format(cam_addr+8)
 
+"""
+Preset Command
+    - Memory Number(=0 to 127) 
+    - speed grade,the values are (0x1~0x18）
+"""
+CAM_Memory_Reset = "81 01 04 3F 00 {:02} FF"
+CAM_Memory_Set = "81 01 04 3F 01 {:02} FF"
+CAM_Memory_Recall = "81 01 04 3F 02 {:02} FF"
+Preset_Recall_Speed = "81 01 06 01 {:02} FF "
 
+
+"""
+Pan Tilt Drive Command
+    - Pan speed 0x01 (low speed) to 0x18 (high speed)
+    - Tilt speed 0x01 (low speed) to 0x14 (high speed)
+
+    - YYYY: Pan Position ZZZZ: Tilt Position
+"""
 Pan_TiltDrive_Up = "81 01 06 01 {:02X} {:02X} 03 01 FF"
 Pan_TiltDrive_Down = "81 01 06 01 {:02X} {:02X} 03 02 FF"
 Pan_TiltDrive_Left = "81 01 06 01 {:02X} {:02X} 01 03 FF"
@@ -30,6 +48,10 @@ Pan_TiltDrive_RelativePosition = "81 01 06 03 {:02X} {:02X} 0{} 0{} 0{} 0{} 0{} 
 Pan_TiltDrive_Home = "81 01 06 04 FF"
 Pan_TiltDrive_Reset = "81 01 06 05 FF"
 
+"""
+Zoom Command
+    speed: 0(low) - 7(high) 
+"""
 CAM_Zoom_Stop = "81 01 04 07 00 FF"
 CAM_Zoom_Tele = "81 01 04 07 02 FF"
 CAM_Zoom_Wide = "81 01 04 07 03 FF"
