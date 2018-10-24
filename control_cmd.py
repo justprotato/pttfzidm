@@ -3,6 +3,16 @@
 # PTZ control over TCP/UDP
 # by Kenny
 import socket
+# default camera address
+cam_addr = 1
+"""
+Error Messages
+"""
+Syntax_Error = "90 60 02 FF"
+Command_Buffer_Full = "90 60 03 FF"
+Command_Canceled = "90 6{} 04 FF".format(cam_addr+8)
+No_Socket = "90 6{} 05 FF".format(cam_addr+8)
+Command_Not_Executable = "90 6{} 41 FF".format(cam_addr+8)
 
 
 Pan_TiltDrive_Up = "81 01 06 01 {:02X} {:02X} 03 01 FF"
@@ -110,7 +120,7 @@ class PTZ():
             self.zooming = False
             self.visca.send(CAM_Zoom_Stop)
 
-    def ptdrive_relative_pos(self, p_speed, t_speed, x, y):
-        lx = list(x)
-        ly = list(y)
+    def ptdrive_relative_pos(self, p_speed, t_speed, x_loc, y_loc):
+        lx = list(x_loc)
+        ly = list(y_loc)
         self.visca.send(Pan_TiltDrive_RelativePosition.format(p_speed, t_speed, lx[0],lx[1],lx[2],lx[3],ly[0],ly[1],ly[2],ly[3]))
