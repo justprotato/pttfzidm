@@ -72,6 +72,7 @@ class VISCA():
     def __init__(self, ip=IP_ADDRESS, port=UDP_PORT):
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.sock.connect((ip, port))
+        self.BUFFER_SIZE = 16
 
     def __del__(self):
         self.sock.close()
@@ -82,6 +83,23 @@ class VISCA():
     def receive(self):
         data = self.sock.recv(self.BUFFER_SIZE)
         return data.hex()
+
+    def wait_finish(self):
+        data = self.sock.recv(self.BUFFER_SIZE)
+        if len(data) < 6:
+            data += self.sock.recv(self.BUFFER_SIZE)
+        return data
+
+    def test_response(self, n=100):
+        all = []
+        for i in range(n):
+            self.send(Pan_TiltDrive_Stop.format(0, 0))
+            stime = time()
+            d = self.wait_finish()
+            print(d, d.hex(), len(d), len(d.hex()))
+            all.append(time() - stime)
+        t = np.array(all)
+        return {'avg': np.average(t), 'max': np.max(t), 'min': np.min(t)}
 
 
 class PTZ():
