@@ -70,7 +70,10 @@ UDP_PORT = 1259
 class VISCA():
 
     def __init__(self, ip=IP_ADDRESS, port=UDP_PORT):
-        self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        if port == TCP_PORT:
+            self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        elif port == UDP_PORT:
+            self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.sock.connect((ip, port))
         self.BUFFER_SIZE = 16
 
@@ -79,27 +82,12 @@ class VISCA():
 
     def send(self, str):
         self.sock.send(bytes.fromhex(str))
+        # self.receive()
+        # self.receive()
 
     def receive(self):
         data = self.sock.recv(self.BUFFER_SIZE)
         return data.hex()
-
-    def wait_finish(self):
-        data = self.sock.recv(self.BUFFER_SIZE)
-        if len(data) < 6:
-            data += self.sock.recv(self.BUFFER_SIZE)
-        return data
-
-    def test_response(self, n=100):
-        all = []
-        for i in range(n):
-            self.send(Pan_TiltDrive_Stop.format(0, 0))
-            stime = time()
-            d = self.wait_finish()
-            print(d, d.hex(), len(d), len(d.hex()))
-            all.append(time() - stime)
-        t = np.array(all)
-        return {'avg': np.average(t), 'max': np.max(t), 'min': np.min(t)}
 
 
 class PTZ():
@@ -110,7 +98,6 @@ class PTZ():
         # init states for sockect logic
         #private
         self.zooming = False
-        self.driving = False
 
     def __del__(self):
         del self.visca
@@ -119,9 +106,7 @@ class PTZ():
         self.visca.send(Pan_TiltDrive_Home)
 
     def pt_stop(self, p_speed, t_speed):
-        if self.driving:
-            self.driving = False
-            self.visca.send(Pan_TiltDrive_Stop.format(24, 20))
+        self.visca.send(Pan_TiltDrive_Stop.format(24, 20))
 
     def up(self, p_speed, t_speed):
         self.visca.send(Pan_TiltDrive_Up.format(p_speed, t_speed))
@@ -164,3 +149,14 @@ class PTZ():
         lx = list(x_loc)
         ly = list(y_loc)
         self.visca.send(Pan_TiltDrive_RelativePosition.format(p_speed, t_speed, lx[0],lx[1],lx[2],lx[3],ly[0],ly[1],ly[2],ly[3]))
+
+    def setPreset(self, index):
+        self.visca.send(CAM_Memory_Set.format(index))
+
+    def callPreset(self, index):
+        self.visca.send(CAM_Memory_Recall.format(index))
+
+    def presetSpeed(self, speed):
+        self.visca.send(Preset_Recall_Speed.format(speed))
+
+
